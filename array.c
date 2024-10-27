@@ -1,14 +1,22 @@
 #include <stdlib.h>
 
-#define blockSize 1000
 #define initLength 1000
 
-typedef int array[initLength];
+typedef int list[initLength];
 
-array* create( void ) {
-    array list;
+struct array {
+    int length;
+    void* list;
+};
 
-    return &list;
+struct array* create( void ) {
+    list list;
+
+    struct array ar = {
+        initLength, list
+    };
+
+    return &ar;
 }
 
 void push() {
