@@ -13,7 +13,6 @@ short CompareRegex(char input, char pattern) {
         return 1;
     }
 
-
     return 0;
 }
 

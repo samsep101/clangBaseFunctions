@@ -1,9 +1,8 @@
 #include <string.h>
-#include "murmur.h"
+#include "../crypto/murmur.h"
 
 #define mm_seed 0
 #define hashMapLength 100
-
 
 
 

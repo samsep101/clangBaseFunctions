@@ -9,6 +9,7 @@ int stringToInt(char string[]) {
     int result = 0;
 
     while (*string != '\0'){
+
         if (is_int(*string)) {
             result *= 10;
             result += charToInt(*string);

@@ -1,0 +1,7 @@
+
+
+
+void* funcionWrapper(void* function) {
+
+    
+}
