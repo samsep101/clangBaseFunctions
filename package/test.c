@@ -5,7 +5,8 @@
 #define isOpenArray(c) c == '['
 #define isCloseArray(c) c == ']'
 #define null 0
-
+#define isOpenObject(c) c == '[' || c == '('
+#define isCloseObject(c) c == '}' || c == ')'
 
 struct {
     unsigned isScope: 1;
@@ -21,7 +22,15 @@ typedef struct data {
 
 typedef struct scope {
     void* data;
+    struct {
+        unsigned isScope: 1;
+        unsigned isArray: 1;
+    } type;
 } scope;
+
+
+
+
 
 
 
@@ -46,6 +55,7 @@ struct scope* readScope(char* string, int* index) {
                 printf("main scope obj initialization;\n");
                 object = malloc(sizeof(scope));
                 (*object).data = NULL;
+                object->type.isScope = 1;
             }else if(object != NULL) {
                 printf("find new scope: read deep scope: %d;\n", *index);
 
@@ -65,11 +75,46 @@ struct scope* readScope(char* string, int* index) {
 //            }
         }
 
+
+        if (isOpenArray(c)) {
+            printf("array opened: %d - %c\n", *index, string[*index]);
+            if (object == NULL) {
+                printf("main array obj initialization;\n");
+                object = malloc(sizeof(scope));
+                (*object).data = NULL;
+                object->type.isArray = 1;
+            }else if(object != NULL) {
+                printf("find new scope: read deep scope: %d;\n", *index);
+
+                int s = (int) readScope(string, index);
+
+
+                if ((void *) s == NULL) {
+                    return NULL;
+                }
+
+
+                object->data = (void *) s;
+            }
+        }
+
+
+        if (isCloseArray(c)) {
+            printf("scope closing: %d - %c\n", *index, string[*index]);
+
+            if (object == NULL || object->type.isArray != 1) {
+                printf("scope closing error - not initializated: %d - %c\n", *index, string[*index]);
+                return NULL;
+            }
+
+            return object;
+        }
+
         if (isCloseScope(c)) {
             // close scope
             printf("scope closing: %d - %c\n", *index, string[*index]);
 
-            if (object == NULL) {
+            if (object == NULL || object->type.isScope != 1) {
                 printf("scope closing error - not initializated: %d - %c\n", *index, string[*index]);
                 return NULL;
             }
@@ -96,7 +141,7 @@ int parse(char* string) {
     while((c = string[index]) != '\0') {
         printf("New char %c at index %d\n", string[index], index);
 
-        if (isOpenScope(c)) {
+        if (isOpenObject(c)) {
             object->type = typeEnum.isArray;
 //            object->data = malloc(sizeof(int*));
             scope *s = readScope(string, &index);
@@ -104,7 +149,7 @@ int parse(char* string) {
             if (s == NULL) {
                 return 1;
             }
-        }else if (isCloseScope(c)) {
+        }else if (isCloseObject(c)) {
             return 2;
         } else {
             return 3;
@@ -119,7 +164,7 @@ int parse(char* string) {
 
 int main() {
 
-    char string[] = "()()(()(())]";
+    char string[] = "[()()([()](()))]";
     int index = 0;
     char c;
 
